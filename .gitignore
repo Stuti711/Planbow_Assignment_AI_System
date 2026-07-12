@@ -3,7 +3,6 @@ __pycache__/
 .env
 documents.db
 uploads/
-samples/out/
 .venv/
 venv/
 .claude/

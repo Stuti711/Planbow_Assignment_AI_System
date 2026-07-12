@@ -5,6 +5,8 @@ Review (inspect, correct, re-classify, approve).
 """
 import json
 import os
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -13,12 +15,54 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT / ".env")
 
 API_BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.75"))
 
 st.set_page_config(page_title="Document Processing Platform", layout="wide")
+
+
+@st.cache_resource
+def ensure_backend() -> None:
+    """Deployment shim for single-container hosts (Streamlit Community Cloud).
+
+    Locally the FastAPI backend runs as its own process and this is a no-op.
+    On Community Cloud there is no second process, so if the backend isn't
+    reachable we bridge Streamlit secrets into env vars and start uvicorn
+    inside this container. The UI still talks to it over plain HTTP.
+    """
+    try:
+        httpx.get(f"{API_BASE}/doctypes", timeout=2)
+        return  # backend already running (normal local setup)
+    except httpx.HTTPError:
+        pass
+
+    try:  # st.secrets raises if no secrets are configured (normal locally)
+        for key in ("GEMINI_API_KEY", "GEMINI_MODEL", "CONFIDENCE_THRESHOLD"):
+            if key in st.secrets:
+                os.environ[key] = str(st.secrets[key])
+    except Exception:
+        pass
+
+    port = API_BASE.rsplit(":", 1)[-1].strip("/") or "8000"
+    subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "backend.app.main:app",
+         "--host", "127.0.0.1", "--port", port],
+        cwd=ROOT,
+    )
+    for _ in range(30):
+        try:
+            httpx.get(f"{API_BASE}/doctypes", timeout=2)
+            return
+        except httpx.HTTPError:
+            time.sleep(1)
+    st.error("Backend failed to start — check the app logs.")
+    st.stop()
+
+
+ensure_backend()
 
 STATUS_BADGES = {
     "processing": "🔄 processing",

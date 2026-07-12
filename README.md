@@ -54,6 +54,19 @@ Interactive API docs: http://127.0.0.1:8000/docs
 
 ## Live demo
 
+### Hosted (Streamlit Community Cloud)
+
+The app runs as a single container on Community Cloud: `ui/streamlit_app.py` has a small deployment shim that starts the FastAPI backend inside the container when no external backend is reachable (locally it's a no-op). To deploy your own instance:
+
+1. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub.
+2. **New app** → repository `Stuti711/Planbow_Assignment_AI`, branch `main`, main file `ui/streamlit_app.py`.
+3. Under **Advanced settings → Secrets**, add: `GEMINI_API_KEY = "your-key"` (optionally `GEMINI_MODEL`).
+4. Deploy. Ready-made test documents are in [`samples/out/`](samples/out/) — download and upload them in the app.
+
+Notes for a public instance: there is no authentication (out of assignment scope), so all visitors see the same document queue, and they share the Gemini API quota of the configured key.
+
+### Local walkthrough
+
 Run locally with the four commands above (backend + UI), then in the UI:
 
 1. **Upload** the files from `samples/out/` (PDF, DOCX and TXT).
