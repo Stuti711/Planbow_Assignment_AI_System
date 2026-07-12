@@ -1,0 +1,6 @@
+# Never apply line-ending conversion to binary sample documents.
+*.pdf binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.db binary
