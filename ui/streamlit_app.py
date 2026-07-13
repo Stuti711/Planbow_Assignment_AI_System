@@ -188,7 +188,11 @@ def show_issues(issues: list) -> None:
 
 def page_upload():
     st.header("Upload documents")
-    st.caption("Supported: PDF, PNG, JPG, DOCX, TXT. Each document is classified, "
+    doctypes, _ = api("GET", "/doctypes")
+    types_str = (", ".join(t["display_name"] for t in doctypes)
+                 if doctypes else "Invoice, Purchase Order, Contract, Resume")
+    st.caption(f"Supported document types: {types_str}. "
+               "File formats: PDF, PNG, JPG, DOCX, TXT. Each document is classified, "
                "extracted and validated automatically, then queued for review.")
     files = st.file_uploader(
         "Choose files", type=["pdf", "png", "jpg", "jpeg", "docx", "txt"],
@@ -221,7 +225,7 @@ def page_documents():
         "ID": d["id"],
         "File": d["filename"],
         "Type": d["doc_type"] or "—",
-        "Status": STATUS_BADGES.get(d["status"], d["status"]),
+        "Status": d["status"].replace("_", " "),
         "Classification confidence": (
             f"{d['classification_confidence']:.0%}"
             if d["classification_confidence"] is not None else "—"
