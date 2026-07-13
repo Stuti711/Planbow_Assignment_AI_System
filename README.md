@@ -71,6 +71,8 @@ I deployed this as a single container on Community Cloud — `ui/streamlit_app.p
 
 Since there's no authentication (a deliberate scope decision, see below), every visitor to a hosted instance shares the same document queue and the same Gemini quota.
 
+**A note on the REST API and this hosted demo.** Streamlit Community Cloud only exposes one public port — the UI's. The FastAPI backend I bootstrap inside the same container binds to `127.0.0.1`, so it's reachable by the UI sitting next to it, but not by an outside HTTP request. That means the live link above shows you the *product* end-to-end (upload → classify → extract → validate → review → approve), and its **"Structured output"** panel on the Review page renders the exact JSON `GET /documents/{id}/result` would return — but the API endpoints themselves aren't independently callable at that public URL. To hit the real REST API directly (e.g. from `curl` or Postman, with interactive docs at `/docs`), run the two processes locally per **Setup** below — that's the same API, just with an externally reachable port. I chose not to add a second free hosting service for this submission; it's a one-line fix (point `API_BASE_URL` at a separately hosted backend) if it's ever needed.
+
 ### Local walkthrough
 
 Run it locally with the four commands above, then in the UI:
