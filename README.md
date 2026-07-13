@@ -2,7 +2,7 @@
 
 **Built by Stuti Nagaich**
 
-**Live app:** https://document-ai-planbow.streamlit.app/ · **Code:** github.com/Stuti711/Planbow_Assignment_AI_System
+**Live app:** https://planbow-document-ai.streamlit.app/ · **Code:** github.com/Stuti711/Planbow_Assignment_AI_System
 
 ---
 
@@ -133,7 +133,7 @@ Where I'd invest next if this went to production:
 
 ## Live demo
 
-**Try it:** https://document-ai-planbow.streamlit.app/
+**Try it:** https://planbow-document-ai.streamlit.app/
 
 Test documents are included in [`samples/out/`](samples/out/) — download them and upload them in the app. A good five-minute walkthrough:
 
