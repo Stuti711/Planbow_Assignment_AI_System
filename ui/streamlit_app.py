@@ -39,12 +39,22 @@ def ensure_backend() -> None:
     except httpx.HTTPError:
         pass
 
-    try:  # st.secrets raises if no secrets are configured (normal locally)
+    try:  # st.secrets raises if no secrets.toml exists at all (normal locally)
         for key in ("GEMINI_API_KEY", "GEMINI_MODEL", "CONFIDENCE_THRESHOLD"):
             if key in st.secrets:
                 os.environ[key] = str(st.secrets[key])
-    except Exception:
-        pass
+    except Exception as exc:
+        if not os.getenv("GEMINI_API_KEY"):
+            st.warning(f"Could not read Streamlit secrets: {exc}")
+
+    if not os.getenv("GEMINI_API_KEY"):
+        st.error(
+            "GEMINI_API_KEY is not configured for this deployment. Open this "
+            'app\'s **⋮ menu → Settings → Secrets**, add `GEMINI_API_KEY = '
+            '"your-key"`, save, then use **Reboot app** (a page refresh is '
+            "not enough — the backend process must restart to pick up the key)."
+        )
+        st.stop()
 
     port = API_BASE.rsplit(":", 1)[-1].strip("/") or "8000"
     subprocess.Popen(
