@@ -30,6 +30,19 @@ ingest → classify → extract → validate → human review → approved struc
 5. **Review** — a person sees the result, with anything low-confidence or failing validation flagged, and can correct it. Nothing is auto-approved.
 6. **Deliver** — once approved, the clean structured data is available as JSON over a REST API for any downstream system to pull.
 
+## Requirements coverage
+
+Everything the brief asked for, and where it lives in the code:
+
+| Requirement | How the solution meets it |
+|---|---|
+| Accept multiple document types | Accepts PDF, PNG/JPG, DOCX, and TXT (`backend/app/ingest.py`) |
+| Automatically identify the document type | AI classification with a confidence score; returns `unknown` when unsure rather than guessing (`ai/classifier.py`) |
+| Extract relevant structured information | Type-specific, schema-enforced extraction — each document type has its own fields (`ai/extractor.py`, `doctypes/`) |
+| Validate the extracted information | Deterministic business-rule validators — arithmetic, date order, email/phone formats, required fields (`doctypes/*.py`) |
+| Allow users to review and correct | Streamlit review screen with low-confidence flags, inline editing, and an approval gate (`ui/streamlit_app.py`) |
+| Expose the processed data in a structured format | REST API returning JSON — `GET /documents/{id}/result` |
+
 ## Architecture overview
 
 ```
