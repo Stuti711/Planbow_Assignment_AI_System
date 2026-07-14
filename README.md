@@ -160,7 +160,7 @@ Test documents are included in [`samples/out/`](samples/out/) — download them 
 
 ## Running it locally
 
-Requires Python 3.10+ and a Gemini API key ([get one here](https://aistudio.google.com/apikey)).
+Requires Python 3.10+ and a Gemini API key
 
 ```bash
 pip install -r requirements.txt
