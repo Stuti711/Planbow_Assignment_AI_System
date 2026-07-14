@@ -2,7 +2,7 @@
 
 **Built by Stuti Nagaich**
 
-**Live app:** https://planbow-document-ai.streamlit.app/ · 
+**Live app:** https://planbow-document-ai.streamlit.app/ 
 
 ---
 
