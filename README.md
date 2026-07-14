@@ -2,7 +2,7 @@
 
 **Built by Stuti Nagaich**
 
-**Live app:** https://planbow-document-ai.streamlit.app/ · **Code:** github.com/Stuti711/Planbow_Assignment_AI_System
+**Live app:** https://planbow-document-ai.streamlit.app/ · 
 
 ---
 
