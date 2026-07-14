@@ -8,11 +8,11 @@
 
 ## The problem I set out to solve
 
-Organizations receive hundreds of business documents a day — invoices, purchase orders, contracts, resumes — and handling them by hand is slow, error-prone, and impossible to scale. I wanted to build a system that removes the manual grind without ever pretending the machine is infallible.
+Organizations receive hundreds of business documents a day — invoices, purchase orders, contracts, resumes — and handling them by hand is slow, error-prone, and impossible to scale. I wanted a system that removes most of the manual work without assuming the AI is always right.
 
 The principle I started from, and kept returning to at every decision point: **let AI do the one thing it's genuinely good at — reading messy, unstructured documents — and keep everything that has to be *correct* in plain, testable, deterministic code.** An AI model is excellent at looking at a PDF and telling you "this is an invoice, and here are its fields." It is not something I'd trust to silently decide whether its own answer is right. So I drew a hard line: the model *proposes*, my code *disposes*.
 
-Everything below follows from that one decision.
+The rest of the design follows from that.
 
 ## What the system does
 
@@ -91,7 +91,7 @@ Adding a new type — say, a bank statement — is two steps, and touches nothin
 1. Write one file in `backend/app/doctypes/` defining its schema, hints, and validators.
 2. Register it in `registry.py`.
 
-The classification options, the extraction schema, the validation run, and even the review form (which builds itself from the data) all read from that registry. I built it this way on purpose so the system scales by *addition*, not by editing the pipeline. The four types shipped — invoice, purchase order, contract, resume — are each just one such file, which is the proof the pattern holds.
+The classification options, the extraction schema, the validation run, and even the review form (which builds itself from the data) all read from that registry. I built it this way on purpose so the system scales by *addition*, not by editing the pipeline. The four types I built — invoice, purchase order, contract, resume — are each just one such file.
 
 ### How I handled incorrect or low-confidence AI responses
 
@@ -104,7 +104,7 @@ I don't trust a single check, so I layered them, cheapest first:
 5. **Mandatory human review** — nothing is approved automatically. Corrections are stored *separately* from the AI's original output, so the original is always available for comparison and audit.
 6. **Failure containment** — if a call fails, the document is marked failed with the reason recorded, and can be retried without re-uploading.
 
-> A real example from building this: I found the model was silently "correcting" a malformed email (`x[at]y.com` → `x@y.com`) during extraction — which would have hidden the very error my validation was meant to catch. I fixed it by instructing the model to copy values *verbatim* and let the deterministic layer judge them. That's the whole philosophy in miniature.
+> A real example from building this: I found the model was silently "correcting" a malformed email (`x[at]y.com` → `x@y.com`) during extraction — which would have hidden the very error my validation was meant to catch. I fixed it by instructing the model to copy values *verbatim* and letting the deterministic layer judge them — a small example of why the AI shouldn't grade its own output.
 
 ### How it integrates with downstream systems
 
@@ -118,7 +118,7 @@ The FastAPI service *is* the integration point. A downstream system (an ERP, an 
 | AI SDK | `google-genai` (official) | Returns model output already validated against a Pydantic schema, so bad output can't get past that boundary. I run every call deterministically (`temperature=0`) with retry/backoff that respects the API's own rate-limit hints, and cap concurrent calls so a burst of uploads doesn't trip quotas. |
 | Backend / API | **FastAPI** | Typed requests and responses, background processing, and automatic interactive API docs. |
 | Storage | **SQLite** (via SQLModel) | Runs with zero setup so anyone can clone and start; moving to Postgres for production is a one-line change. |
-| Review UI | **Streamlit** | Let me build a genuinely usable review-and-correct interface quickly, while keeping it a thin client of the backend. |
+| Review UI | **Streamlit** | Let me build a usable review-and-correct interface quickly, while keeping it a thin client of the backend. |
 | Schemas & validation | **Pydantic** | One schema per document type drives extraction, correction-checking, and the API contract from a single definition. |
 | Test data | **reportlab / python-docx** | I generate a sample set with *deliberate* defects (a wrong invoice total, a malformed email) so the validation layer can be demonstrated, not just claimed. |
 
